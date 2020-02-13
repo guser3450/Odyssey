@@ -1,0 +1,66 @@
+"The array storeys is the first array the user will interact with to start is journey"
+INIT storeys [
+FOR EACH storeys[i] define a Number 1++ UNTIL EQUALS 60 AND MINUS 1-- UNTIL EQUALS -6
+1 <-- RC 
+
+
+    FOR RC 
+    colonne_panel <-- print 16 buttons IN colonne of 3x5 
+    FOR button 1 TO 9 AND -1 TO -6 AND 0
+    "The time to input the floor number he want's to go and "
+    INIT ON_colonne_panel USING colonne_panel AND Number
+    print user total Number of 2 Number 
+    RETURN TO 0 every 7 secondes
+    "0 ready to receive a other floor number"
+
+        SEQUENCE request_elevator USING floor AND direction
+            IF floor IS BETWEEN 2 TO 20 THEN
+                print go to colonne A
+
+                    INIT colonne A[
+                        2 TO 20
+                        INIT elevator [
+                            1 TO 3
+                        ]
+                    ]
+            ELSE IF floor IS BETWEEN 21 TO 40 THEN
+                RETURN print colonne B
+
+                    INIT colonne B[
+                        21 TO 40
+                        INIT elevator B[
+                            1 TO 3
+                        ]
+                    ]
+            ELSE IF floor IS BETWEEN 41 TO 60 THEN
+                RETURN print colonne C
+
+                    INIT colonne C[
+                        41 TO 60
+                        INIT elevator C[
+                            1 TO 3
+                        ]
+                    ]
+            ELSE IF floor IS BETWEEN -1 TO -6 THEN
+                RETURN print colonne D
+
+                    INIT colonne D[
+                        -1 TO -6
+                        INIT elevator D[
+                            1 TO 3
+                        ]
+                    ]
+        ENDSEQUENCE
+
+        
+
+
+
+
+                                                
+    ENDFOR
+
+ENDFOR
+]
+
+

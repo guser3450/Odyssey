@@ -7,10 +7,10 @@ INIT Elevator_list[2]
 FOR EACH Elevator ADD 1 action_list
 
 
-"the list to know if elevators are in action"
-INIT action_list [
-    INPUT 
-]
+"the list to know if elevators are doing something or not"
+Floor_list 
+
+elevator stop 
 
 
 "the floor were the user as the choice to go UP or DOWN"
@@ -42,29 +42,39 @@ Storeys[i] EQUALS User_floor[i]
 
 "operate see the elevator list is empty or not and add a call to the choices elevator"
 SEQUENCE operator USING elevator AND floor
+    ADD floor to  Elevator_floor_list
+    CALL move
 
-    ADD request_elevator() INPUT TO action_list
-    IF(action_list[i] of elevator[i] EQUALS NULL THEN)
-        RETURN Elevator
-    ELSE IF(action_list[i] of elevator[i] IS NOT EQUALS TO NULL THEN)
-        ADD move() TO action_list 
+
+    // ADD request_elevator() INPUT TO action_list
+    // IF(action_list[i] of elevator[i] EQUALS NULL THEN)
+    //     RETURN Elevator
+    // ELSE IF(action_list[i] of elevator[i] IS NOT EQUALS TO NULL THEN)
+    //     ADD move() TO action_list 
 ENDSEQUENCE
 
 
 " 1 STEP: Button on the colonne(up, down) so request_elevator is dependente to find_elevator and find_elevator depend on request_elevator"
 "???EST-CE QUE JE DOIS ABSULUMENT RENDRE MES 2 SEQUENCES DEPENDENTE UNE DE LAUTRE???"
-SEQUENCE request_elevator USING Button AND direction
-    FOR EACH Button INPUT IN User_floor[i]
-        IF(Button UP IS click)
-            RETURN direction Up AND 
-        ELSE IF(Button Down IS click)
-            RETURN direction Down
-        operate elevator, ajoute a lsite, 
-    ENDFOR        
+SEQUENCE request_elevator USING floor AND direction
+    CALL find_elevator USING floor AND direction
+    CALL operator USING Elevator AND Button
+    
+
+
+
+
+    // FOR EACH Button INPUT IN User_floor[i]
+    //     IF(Button UP IS click)
+    //         RETURN direction Up AND 
+    //     ELSE IF(Button Down IS click)
+    //         RETURN direction Down
+    //     operate elevator, ajoute a lsite, 
+    // ENDFOR        
 ENDSEQUENCE
 
 
-SEQUENCE Open_door()
+SEQUENCE Open_door 
     SPEED <-- 10 sec 
         Return open door for SPEED
 ENDSEQUENCE
@@ -78,34 +88,92 @@ SEQUENCE Close_door()
 ENDSEQUENCE
 
 
-SEQUENCE move(Elevator, direction)
-    FOR EACH input_elevator()
-    IF(input_elevator() IS greater TO current Storeys[i] THEN)
-        Storeys[i] Elevator ADD 1 UNTIL input_elevator() IS EQUALS TO current Storeys[i]     
-    ELSE IF(input_elevator() IS smaller TO current Storeys[i] THEN)
-        Storeys[i] Elevator DECREMENT 1 UNTIL intul_elevator() IS EQUALS TO current Storeys[i] 
+"In this SEQUENCE I tell the elevator to use the floor_list to go up and down and I add some condition to max the quantity of people in the elevator"
+SEQUENCE move USING Elevator AND floor_list 
+WHILE floor_list is NOT empty 
+    FOR EACH input_elevator
+    IF Elevator_Floor IS greater TO floor_List THEN
+        MoveDown AND REPEAT UNTIL elevator_floor IS EQUALS TO floor_list THEN
+        STOP AND Open_door
+
+    IF Elevator_Floor IS smaller TO floor_List THEN 
+        MoveUp AND REPEAT UNTIL elevator_floor IS EQUALS TO floor_list THEN
+        STOP AND Open_door
+
+    IF Floor_list IS NOT EQUALS TO NULL THEN 
+        ADD the new request_elevator at the END OF the floor_list 
+        IF floor_list containt MoveUp AND the new request_elevator IS Up THEN 
+            ADD the new request_elevator TO the top OF floor_list 
+
+        IF floor_list containt MoveDown AND the new request_elevator IS Down THEN
+            ADD the new request_elevator TO the top OF floor_list
     ENDFOR
+ENDWHILE
+
+WHILE floor_list IS empty
+    FOR EACH request_elevator
+    IF request_elevator IS Up THEN 
+        ADD TO floor_list
+    IF request_elevator IS Down THEN
+        ADD TO floor_list
+    ENDFOR
+ENDWHILE
+    
 ENDSEQUENCE
 
 
-"step 2: Find the best elevator for the user and add the action(up ar down) to the action_list" **** need to add more possibility****
-SEQUENCE find_elevator(floor, direction)
-    FOR EACH elevator in the Elevator_list[i]
-    "??? EST-CE QUE JE DOIT ABSOLUMENT AVOIR LA SOURCE DINFORMATION DE MON elevator floor pour devoir determiner sa valeur???"
-    IF(elevator floor EQUALS User floor AND elevator direction EQUALS User direction THEN)
-        RETURN Elevator[i] AND Open_door() AND ADD INPUT TO action_list[i]
-    ELSE IF(elevator direction EQUALS User direction AND elevator floor MINUS User floor IS smaller TO 0 THEN)
-        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
-    ELSE IF(elevator direction EQUALS User direction AND elevator floor MINUS User floor IS greater to 0 THEN)
-        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
-    ELSE IF(elevator floor EQUALS User floor AND elevator direction IS Up AND User direction IS Down THEN)
-        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
-    ELSE IF(elevator floor EQUALS User floor AND elevator direction IS Down AND User direction IS Down THEN)
-        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
-    ELSE IF(elevator direction IS Down AND User direction IS Up AND elevator floor MINUS User floor IS smaller TO 0 THEN)
-        RETURN Elevator[i] AND ADD INPUT TO action_list[i] 
-    ELSE IF(elevator direction IS Down AND User direction IS Up AND elevator floor MINUS User floor IS greater TO 0 THEN)
-        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
+SEQUENCE find_elevator USING user_floor AND user_direction AND elevator_floor AND elevator_direction AND elevator_stop
+
+   INIT bestCase_list
+    IF elevator EQUALS Priority THEN
+        SET elevator_gap to user_floor MINUS elevator_floor
+        RETURN elevator 
+
+
+    IF elevator_floor EQUALS user_floor AND elevator IS stop
+    assigne to priority 1
+
+    IF elevator_floor IS greater TO user_floor AND elevator IS stop OR elevator_floor IS smaller TO user_floor AND elevator IS stop THEN 
+        assigne to priority 2 
+
+    IF elevator_floor IS greater TO user_floor AND elevator_direction EQUALS user_direction OR elevator_floor IS smaller TO user_floor AND elevator_direction EQUALS user_direction THEN
+        assigne to priority 3
+
+    IF elevator_floor IS greater TO user_floor AND elevator_direction IS NOT EQUALS TO user_direction OR elevator_floor IS smaller TO user_floor AND elevator_direction IS NOT EQUALS TO user_direction THEN
+        assigne to priority 4
+
+
+    FOR EACH elevator IN elevator_list
+
+    IF elevatorfloor EQUALS user_floor AND elevator_stop THEN
+        RETURN elevator
+
+    ELSE IF elevator_floor IS higher TO user_floor AND elevator_stop THEN
+        ADD elevator TO bestCase_list and Priority 1
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_stop THEN
+        ADD TO bestCase_list elevator and Priority 1 
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_direction EQUALS user_direction THEN
+        ADD TO bestCase_list elevator and Priority 2
+
+    ELSE IF elevator_floor IS higher user_floor AND elevator_direction EQUALS user_direction THEN
+        ADD TO bestCase_list elevator and Priority 2
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_direction EQUALS user_direction THEN
+        RETURN elevator
+
+    ELSE IF elevator_floor IS higher user_floor AND elevator_direction EQUALS user_direction THEN
+        RETURN elevator
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_direction THEN   
+        RETURN elevator
+
+    ELSE IF 
+
+    END FOR
+
+    Compare bestCase_list 
 ENDSEQUENCE
 
 
