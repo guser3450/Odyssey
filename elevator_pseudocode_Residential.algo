@@ -1,0 +1,126 @@
+"include "\0" at the end"
+INIT User_floor[11]
+
+
+"elevator_list"
+INIT Elevator_list[2]
+FOR EACH Elevator ADD 1 action_list
+
+
+"the list to know if elevators are in action"
+INIT action_list [
+    INPUT 
+]
+
+
+"the floor were the user as the choice to go UP or DOWN"
+INIT User_floor[11]
+    ADD Button FOR EACH User_floor[i]
+    FOR EACH Button OUTPUT print(Up) AND print(Down)
+    FOR EACH Up AND Down Button IS define By Number(1++)
+    UNTIL END of Button[i]
+    1 <-- RC 
+
+
+"this pointer does not change array. It only transport information form the user INPUT FROM Floor[1] (An ARRAY to An other)"
+POINTER <-- Elevator  
+
+
+"the floor were the user is IN the elevator with the choice of witch floors he wants to go"
+INIT Storeys[i]
+
+
+Storeys[i] EQUALS User_floor[i]
+    //pointer
+    ADD Elevator
+    FOR EACH Storeys[i] ADD Button AND print(Storeys[i])
+
+
+
+//              SEQUENCE             \\
+
+
+"operate see the elevator list is empty or not and add a call to the choices elevator"
+SEQUENCE operator USING elevator AND floor
+
+    ADD request_elevator() INPUT TO action_list
+    IF(action_list[i] of elevator[i] EQUALS NULL THEN)
+        RETURN Elevator
+    ELSE IF(action_list[i] of elevator[i] IS NOT EQUALS TO NULL THEN)
+        ADD move() TO action_list 
+ENDSEQUENCE
+
+
+" 1 STEP: Button on the colonne(up, down) so request_elevator is dependente to find_elevator and find_elevator depend on request_elevator"
+"???EST-CE QUE JE DOIS ABSULUMENT RENDRE MES 2 SEQUENCES DEPENDENTE UNE DE LAUTRE???"
+SEQUENCE request_elevator USING Button AND direction
+    FOR EACH Button INPUT IN User_floor[i]
+        IF(Button UP IS click)
+            RETURN direction Up AND 
+        ELSE IF(Button Down IS click)
+            RETURN direction Down
+        operate elevator, ajoute a lsite, 
+    ENDFOR        
+ENDSEQUENCE
+
+
+SEQUENCE Open_door()
+    SPEED <-- 10 sec 
+        Return open door for SPEED
+ENDSEQUENCE
+
+
+SEQUENCE Close_door()
+    if(obstacle == true)
+        RETURN Open_door()
+    else()
+        RETURN Open_door()
+ENDSEQUENCE
+
+
+SEQUENCE move(Elevator, direction)
+    FOR EACH input_elevator()
+    IF(input_elevator() IS greater TO current Storeys[i] THEN)
+        Storeys[i] Elevator ADD 1 UNTIL input_elevator() IS EQUALS TO current Storeys[i]     
+    ELSE IF(input_elevator() IS smaller TO current Storeys[i] THEN)
+        Storeys[i] Elevator DECREMENT 1 UNTIL intul_elevator() IS EQUALS TO current Storeys[i] 
+    ENDFOR
+ENDSEQUENCE
+
+
+"step 2: Find the best elevator for the user and add the action(up ar down) to the action_list" **** need to add more possibility****
+SEQUENCE find_elevator(floor, direction)
+    FOR EACH elevator in the Elevator_list[i]
+    "??? EST-CE QUE JE DOIT ABSOLUMENT AVOIR LA SOURCE DINFORMATION DE MON elevator floor pour devoir determiner sa valeur???"
+    IF(elevator floor EQUALS User floor AND elevator direction EQUALS User direction THEN)
+        RETURN Elevator[i] AND Open_door() AND ADD INPUT TO action_list[i]
+    ELSE IF(elevator direction EQUALS User direction AND elevator floor MINUS User floor IS smaller TO 0 THEN)
+        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
+    ELSE IF(elevator direction EQUALS User direction AND elevator floor MINUS User floor IS greater to 0 THEN)
+        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
+    ELSE IF(elevator floor EQUALS User floor AND elevator direction IS Up AND User direction IS Down THEN)
+        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
+    ELSE IF(elevator floor EQUALS User floor AND elevator direction IS Down AND User direction IS Down THEN)
+        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
+    ELSE IF(elevator direction IS Down AND User direction IS Up AND elevator floor MINUS User floor IS smaller TO 0 THEN)
+        RETURN Elevator[i] AND ADD INPUT TO action_list[i] 
+    ELSE IF(elevator direction IS Down AND User direction IS Up AND elevator floor MINUS User floor IS greater TO 0 THEN)
+        RETURN Elevator[i] AND ADD INPUT TO action_list[i]
+ENDSEQUENCE
+
+
+"step 3: button in elevator"
+SEQUENCE input_elevator(floor, direction)
+    FOR EACH time find_elevator() RETURN elevator 
+    User from User_floor[i] go TO Storeys[i] AND INPUT Storeys[i]
+    CALL Close_door()
+    Elevator go TO INPUT Storeys[i]
+    Open_door()
+    ENDFOR
+ENDSEQUENCE
+
+
+
+
+
+
