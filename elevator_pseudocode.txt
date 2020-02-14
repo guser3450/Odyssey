@@ -55,9 +55,9 @@ FOR floor 10 OUTPUT button_down
 INPUT button_down or button_up
 ENDSEQUENCE
 
-location function(Elevator1) 
+SEQUENCE location(elevator_list, location) 
 if()
-    Elevator1 == button_RC
+    elevator_liste == button_RC
         return true 
 else if()
     Elevator1 == button_2
@@ -176,3 +176,41 @@ first_tier(button_down, button_up)
 if(button_up, button_down is click)
 find locatio
 
+
+    IF elevatorfloor EQUALS user_floor AND elevator_stop THEN
+        RETURN elevator
+
+    ELSE IF elevator_floor IS higher TO user_floor AND elevator_stop THEN
+        ADD elevator TO bestCase_list and Priority 1
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_stop THEN
+        ADD TO bestCase_list elevator and Priority 1 
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_direction EQUALS user_direction THEN
+        ADD TO bestCase_list elevator and Priority 2
+
+    ELSE IF elevator_floor IS higher user_floor AND elevator_direction EQUALS user_direction THEN
+        ADD TO bestCase_list elevator and Priority 2
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_direction EQUALS user_direction THEN
+        RETURN elevator
+
+    ELSE IF elevator_floor IS higher user_floor AND elevator_direction EQUALS user_direction THEN
+        RETURN elevator
+
+    ELSE IF elevator_floor IS smaller TO user_floor AND elevator_direction THEN   
+        RETURN elevator
+
+            // ADD request_elevator INPUT TO action_list
+    // IF(action_list[i] of elevator[i] EQUALS NULL THEN)
+    //     RETURN Elevator
+    // ELSE IF(action_list[i] of elevator[i] IS NOT EQUALS TO NULL THEN)
+    //     ADD move TO action_list 
+
+    // FOR EACH Button INPUT IN User_floor[i]
+    //     IF(Button UP IS click)
+    //         RETURN direction Up AND 
+    //     ELSE IF(Button Down IS click)
+    //         RETURN direction Down
+    //     operate elevator, ajoute a lsite, 
+    // ENDFOR    
