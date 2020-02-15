@@ -14,33 +14,50 @@ REQUEST
     - floor
     - elevator for this specific senario 
 
+INIT elevator_list
+    number of elevator in column
 
-"elevator_list"
-INIT Elevator_list
- elevator
+INIT column_list 
+    EACH column_list contains elevator_list
+
+"user wants to go to wock and to come back from it9"
+SET TIMER TIER 1
+FOR EACH elevator in column_list
+IF time is between 1h00 am to 10h00 am OR 14h01 pm to 12h59 pm THEN 
+    display first idle elevator to last floor AND second idle elevator between the last and the first floor
+END IF
+END FOR
 
 
-INIT User_floor
+"user is coming back for diner"
+SET TIMER TIER 2 
+FOR EACH elevator in column_list
+IF time is between 10h01 am to 14h00 pm THEN
+    display first idle elevator to first floor AND second idle elevator between the last and the first floor
+END IF 
+END FOR 
 
+
+
+"2 elevators"
 INIT status
     idle AND Up AND Down
-
-INIT floor 
 
 "the floor were the user as the choice to go UP or DOWN"
 INIT User_floor
     ADD Button FOR EACH User_floor
     FOR EACH Button OUTPUT print(Up) AND print(Down)
-    UNTIL END of Button
+    IF Button is click THEN
+        display a RED light around the Button
+    END IF
     1 <-- RC
+    END FOR 
 
 
-"Button on the colonne(up, down) so request_elevator is dependente to find_elevator and find_elevator depend on request_elevator"
-SEQUENCE request_elevator USING floor AND direction
-    CALL find_elevator WITH floor AND direction
-    CALL queue WITH floor AND direction RETURNING queue 
-    CALL operator 
+SEQUENCE request_elevator USING floor AND direction 
+    CALL find_elevator 
     CALL move 
+    CALL queue 
     CALL Open_door
     CALL Close_door
 ENDSEQUENCE
@@ -49,77 +66,40 @@ ENDSEQUENCE
 SEQUENCE find_elevator USING user_floor AND user_direction 
 
    INIT priority 
-   INIT best_elevator
+    FOR EACH elevator IN COLUMN elevator_list 
 
-    FOR EACH elevator IN COLUMN elevator_list
+    IF user_floor is higher to elevator floor AND user_destination is Up AND elevator destination is Up  Or  user_floor is lower to elevator floor AND user_destination is Up AND elevator destination is Up THEN
+    ADD TO priority 1 
 
-   IF user_floor is higher to elevator_floor AND user_destination is Down AND elevator_destination is Down THEN
-    IF priority > 
-    ADD TO bestCase_list priority 5
+    ELSE IF user_floor is EQUALS to elevator floor AND elevator is on idle THEN
+    ADD TO priority 2
 
-    ELSE IF user_floor is higher to elevator_floor AND user_destination is Down AND elevator_destination is up THEN
-    ADD TO bestCase_list priority 
+    ELSE IF user_floor is higher to elevator floor AND elevator is on idle  OR  user_floor is lower to elevator_floor AND elevator is on idle THEN
+    ADD TO priority 3
 
-    ELSE IF user_floor is lower to elevator_floor AND user_destination is Up AND elevator_destination is up THEN
-    ADD TO bestCase_list 5
+    ELSE IF user_floor is higher to elevator floor AND user_destination is Up AND elevator destination is Down  OR  user_floor is lower to elevator floor AND user_destination is Up AND elevator destination is Down THEN
+    ADD TO priority 4
 
-    ELSE IF user_floor is lower to elevator_floor AND user_destination is Down AND elevator_destination is up THEN
-    ADD TO bestCase_list    
+    ELSE IF their is multiple priority THEN 
+    priority 1 is the first choice AND 4 is the last choice
 
-    ELSE IF user_floor is higher to elevator_floor AND user_destination is Up AND elevator_destination is up THEN
-    ADD TO bestCase_list to priority 1
-
-    ELSE IF user_floor is higher to elevator_floor AND user_destination is Up AND elevator_destination is Down THEN
-    ADD TO bestCase_list to priority              
-
-    ELSE IF user_floor is lower to elevator_floor AND user_destination is Down AND elevator_destination is Down THEN
-    ADD TO bestCase_list to priority               
-
-    ELSE IF user_floor is lower to elevator_floor AND user_destination is Down AND elevator_destination is Up THEN
-    ADD TO bestCase_list to priority               
-
-    ELSE IF user_floor is higher to elevator_floor AND user_destination is Up AND elevator_IDLE THEN
-    ADD TO bestCase_list to priority      
-
-    ELSE IF user_floor is higher to elevator_floor AND user_destination is Down AND elevator_IDLE THEN
-    ADD TO bestCase_list to priority
-
-    ELSE IF user_floor is lower to elevator_floor AND user_destination is Down AND elevator_IDLE THEN
-    ADD TO bestCase_list to priority               
-               
-    ELSE IF user_floor is lower to elevator_floor AND user_destination is Up AND elevator_IDLE THEN
-    ADD TO bestCase_list to priority          
-
-    ELSE IF user_floor is EQUALS to elevator_floor AND user_destination is Up AND elevator_IDLE THEN
-    RETURN elevator  
-
-    ELSE IF user_floor is EQUALS to elevator_floor AND user_destination is Down AND elevator_IDLE  THEN
-    RETURN elevator 
-
-    ELSE IF user_floor is EQUALS to elevator_floor AND user_destination is Up AND elevator_floor IS Up THEN
-    ADD TO bestCase_list to priority 4
-
-    ELSE IF user_floor is EQUALS to elevator_floor AND user_destination is Up AND elevator_floor IS Down THEN
-    ADD TO bestCase_list to priority 4
-
-    ELSE IF user_floor is EQUALS to elevator_floor AND user_destination is Down AND elevator_floor IS Up THEN
-    ADD TO bestCase_list to priority 4
-
-    ELSE IF user_floor is EQUALS to elevator_floor AND user_destination is Down AND elevator_floor IS Down THEN
-    ADD TO bestCase_list to priority 4
-
-    FOR EACH elevator IN COLUMN elevator_list
-
-    ELSE IF elevator EQUALS Priority THEN
-        SET elevator_gap to user_floor MINUS elevator floor
+        CALL calculate_gap 
         RETURN elevator 
     END FOR
-    Compare bestCase_list 
-    return best_elevator    
+    END IF 
+   
+ENDSEQUENCE
 
+"difference for each elevator in the same priority to get the smallest value"
+SEQUENCE calculate_gap USING direction AND floor 
+SET all number to positive 
+    IF priority_list is choose THEN 
+        do the difference between elevator floor AND user floor AND choose the 
+        RETURN smallest value
 ENDSEQUENCE
 
 
+"were the elevator prioritizes the pick up"
 SEQUENCE queue USING floor AND direction
 IF user request_elevator direction EQUALS to elevator current direction THEN
     elevator will stop AND Open_door AND Close_door AND continue is direction 
@@ -128,49 +108,13 @@ ELSE user request_elevator direction is NOT EQUALS to current direction THEN
 ENDSEQUENCE
 
 
-"operator see if the elevator list is empty or not and add a call to the choices elevator"
-SEQUENCE operator USING elevator AND floor
-INIT operator_list USING direction
-    
-    CALL find_elevator 
-    RETURN elevator
-IF elevator_list EQUALS to NULL THEN
-    ADD user_floor to operator_list
-    CALL move
-ELSE IF elevator operator_list is NOT EQUALS to NULL THEN 
-    ADD user_floor to end of operator_list
-
-ENDSEQUENCE
-
-
-"In this SEQUENCE I tell the elevator to use the floor_list to go up and down and I add some condition to max the quantity of people in the elevator"
-SEQUENCE move USING Elevator AND floor_list 
-WHILE floor_list is NOT empty 
-    FOR EACH input_elevator
-    IF Elevator_Floor IS higher TO floor_List THEN
-        MoveDown AND REPEAT UNTIL elevator_floor IS EQUALS TO floor_list THEN
-        idle AND Open_door
-
-    IF Elevator_Floor IS lower TO floor_List THEN 
-        MoveUp AND REPEAT UNTIL elevator_floor IS EQUALS TO floor_list THEN
-        idle AND Open_door
-
-    IF Floor_list IS NOT EQUALS TO NULL THEN 
-        ADD the new request_elevator at the END OF the floor_list 
-        IF floor_list containt MoveUp AND the new request_elevator IS Up THEN 
-            ADD the new request_elevator TO the top OF floor_list 
-
-        IF floor_list containt MoveDown AND the new request_elevator IS Down THEN
-            ADD the new request_elevator TO the top OF floor_list
-    ENDFOR
-WHILE floor_list IS empty
-    FOR EACH request_elevator
-    IF request_elevator IS Up THEN 
-        ADD TO floor_list
-    IF request_elevator IS Down THEN
-        ADD TO floor_list
-    ENDFOR
-ENDWHILE
+"In this SEQUENCE I tell the elevator to go up or down if queue if used"
+SEQUENCE Move USING floor AND direction
+If elevator direction is up THEN 
+    go to the floor up above
+ELSE IF elevator direction is down THEN 
+    go to the lower floor
+    Move Up OR Move Down
 ENDSEQUENCE
 
 

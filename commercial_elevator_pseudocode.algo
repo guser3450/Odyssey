@@ -14,82 +14,197 @@ REQUEST
     - floor
     - elevator for this specific senario 
 
-"The floor is the first array the user will interact with to start is journey"
 INIT floor 
 FOR EACH floor define a Number 1++ UNTIL EQUALS 60 AND ADD B1 to B6 FOR the basement
-1 <-- RC 
+END FOR
+
+INIT column_list 
+    EACH column contains elevator_list
+
+INIT elevator_list
+    number of elevator in column
+
+"user wants to go to wock and to come back from it"
+SET TIMER TIER 1
+FOR EACH elevator in column_list
+IF time is between 1h00 am to 10h00 am OR 14h01 pm to 12h59 pm THEN 
+    display first idle elevator to first floor AND display second idle elevator between the last and the first floor AND display the other elevator in elevator_list on first 
+END IF
+END FOR
 
 
-    FOR RC 
-
-ENDFOR
-
-    "the actual panel to press the requested floor"
-    INIT ON_column_panel USING floor AND destination
-    print 1 buttons IN column of 3x5 
-    print user requested floor of 2 Number
-    "we can request floor every 7 secondes" 
-    RETURN TO 0 every 7 secondes
-
-    column <-- 
-    FOR EACH button 1 TO 9 AND B1 TO B6 AND 0
-    "0 means ready to receive a other floor number"
-
-        SEQUENCE request_elevator USING floor AND direction
-            IF floor IS BETWEEN 2 TO 20 THEN
-                print go to colonne A
-
-                    INIT colonne A[
-                        2 TO 20
-                        INIT elevator [
-                            A1 TO A3
-                        ]
-                    ]
-            ELSE IF floor IS BETWEEN 21 TO 40 THEN
-                RETURN print colonne B
-
-                    INIT colonne B[
-                        21 TO 40
-                        INIT elevator B[
-                            B1 TO B3
-                        ]
-                    ]
-            ELSE IF floor IS BETWEEN 41 TO 60 THEN
-                RETURN print colonne C
-
-                    INIT colonne C[
-                        41 TO 60
-                        INIT elevator C[
-                            C1 TO C3
-                        ]
-                    ]
-            ELSE IF floor IS BETWEEN -1 TO -6 THEN
-                RETURN print colonne D
-
-                    INIT colonne D[
-                        -1 TO -6
-                        INIT elevator D[
-                            D1 TO D3
-                        ]
-                    ]
-        ENDSEQUENCE
+"user is coming back for diner"
+SET TIMER TIER 2 
+FOR EACH elevator in column_list
+IF time is between 10h01 am to 14h00 pm THEN
+    display first idle elevator to last floor of its column AND second idle elevator between the last and the first floor of its column AND display the other elevator in elevator_list on first 
+END IF
+END FOR 
 
 
+"the actual panel to press the requested floor in rc"
+in first floor
+INIT column_panel USING floor AND destination
+RECTANGLE OUTPUT WITH buttons display in 3x5
+FOR EACH button asigne 1 TO 9 AND B1 TO B6 
+print in red user requested floor of 2 Number on small screen on midle top of the RECTANGLE OUTPUT
+IF user press 2 times on the same buttons exept for the B1 to B6 buttons THEN 
+    RETURN 2 same number 
 
-"display idle elevator to a specific floor to be prepare for the demand"
-WHILE 
-SET timer to 1h to 8h
-SET starting point for elevator_list ******************************
-IF elevator_IDLE THEN 
-RETURN elevator_IDLE to
-ONCE timer REACH 8h END WHILE LOOP
+"we can request floor every 7 secondes" 
+RETURN TO 0 every 7 secondes
+"0 means ready to receive a other floor number" 
 
+SEQUENCE request_elevator USING floor AND direction
+    IF user press buttons on first floor THEN 
+        RETURN number  
+    IF floor IS BETWEEN 2 TO 20 THEN
+        print colonne A
 
-IF the user INPUT a floor THEN
-    CALL find_elevator 
-    CALL operate_elevator (retourn to RC AND receive floor_destination)
+        INIT colonne A
+        FOR every floor INPUT button to go down
+            INIT elevator 
+                A1 TO A3
+        END FOR
+
+    ELSE IF floor IS BETWEEN 21 TO 40 THEN
+        print colonne B
+
+        INIT colonne B
+        FOR every floor INPUT button to go down
+            INIT elevator B
+                B1 TO B3
+        END FOR
+
+    ELSE IF floor IS BETWEEN 41 TO 60 THEN
+        print colonne C
+
+        INIT colonne C
+        FOR every floor INPUT button to go down
+            INIT elevator C
+                C1 TO C3
+        END FOR
+  
+    ELSE IF floor IS BETWEEN B1 TO B6 THEN
+        print colonne D
+
+        INIT colonne D
+        FOR every floor INPUT button to go down
+            INIT elevator D
+                D1 TO D3
+        END FOR
+    END IF
+ENDSEQUENCE
+
+"main event"
+SEQUENCE request_elevator USING floor AND direction
+IF the user INPUT a floor on column_panel THEN
+    CALL find_elevator OR CALL find_basement
+    CALL Move
+    CALL queue OR CALL queue_B
     CALL open_door 
-    CALL close_door 
+    CALL close_door
+END IF  
+ENDSEQUENCE
+
+SEQUENCE find_elevator USING user_floor AND user_destination AND idle
+FOR EACH elevator_list
+
+    IF floor is 2 to 20 THEN
+        RETURN column B 
+    ELSE IF floor is 21 to 40
+        RETURN column C 
+    ELSE IF floor is 41 to 60
+        RETURN column D
+SET priority_list
+
+    IF elevator go up THEN 
+        go up until requested floor 
+
+    ELSE IF elevator go down AND user floor is lower to elevator floor THEN 
+        ADD TO priority 1
+        CALL calculate_gap
+        RETURN elevator
+
+    ELSE IF elevator status EQUALS idle THEN 
+        ADD TO priority 2
+        CALL calculate_gap
+        RETURN elevator
+END FOR
+ENDSEQUENCE
+
+
+SEQUENCE find_basement USING user_floor AND user_destination AND idle
+FOR column A 
+FOR EACH elevator in elevator_list 
+SET priority_list
+
+    IF elevator go down THEN 
+        go up until requested floor 
+
+    ELSE IF elevator go up AND user floor is higher to elevator floor THEN 
+        ADD TO priority 1
+        CALL calculate_gap
+        RETURN elevator
+
+    ELSE IF elevator status EQUALS idle THEN 
+        ADD TO priority 2
+        CALL calculate_gap
+        RETURN elevator
+END IF
+END FOR
+ENDSEQUENCE 
+
+
+"difference between elevators in the same priority"
+SEQUENCE calculate_gap USING direction AND floor 
+SET all number to positive 
+FOR EACH column_list AND elevator_list
+    IF request_elevator
+        do the difference between elevator floor AND user floor AND 
+        Return the smallest value
+    END IF
+END FOR 
+ENDSEQUENCE
+
+
+"In this SEQUENCE I tell the elevator to go up or down if queue if used"
+SEQUENCE Move USING floor AND direction
+If elevator direction is up THEN 
+    go to the floor up above
+ELSE IF elevator direction is down THEN 
+    go to the lower floor
+    Move Up OR Move Down
+ENDSEQUENCE
+
+
+SEQUENCE queue USING floor AND direction
+FOR EACH elevator_list
+    IF floor is 2 to 20 THEN
+        RETURN column B 
+    ELSE IF floor is 21 to 40
+        RETURN column C 
+    ELSE IF floor is 41 to 60
+        RETURN column D
+IF request_elevator direction is EQUALS to elevator current direction AND the user is BETWEEN elevator AND floor 1 THEN
+    elevator will stop AND Open_door AND Close_door AND continue is direction 
+ELSE user request_elevator direction is NOT EQUALS to current direction THEN
+    elevator will continue is Move 
+END FOR
+ENDSEQUENCE
+
+
+SEQUENCE queue_B USING floor AND direction
+FOR EACH elevator_list
+    IF floor is B1 to B6 THEN
+        RETURN column A
+   
+IF request_elevator direction is EQUALS to elevator current direction AND the user is BETWEEN elevator AND floor 1 THEN
+    elevator will stop AND Open_door AND Close_door AND continue is direction 
+ELSE user request_elevator direction is NOT EQUALS to current direction THEN
+    elevator will continue is Move 
+END FOR
+ENDSEQUENCE
 
 
 
@@ -104,62 +219,5 @@ SEQUENCE Close_door USING obstacle AND Open_door
         RETURN Open_door
     else
         RETURN Open_door
+    END LOOP 
 ENDSEQUENCE
-
-SEQUENCE find_elevator USING user_floor AND elevator_floor AND user_destination AND elevator_destination AND elevator_IDLE
-
-"compare the value in each priority"
-SET priority_list
-    priority 1
-    ""
-    priority 2 
-    "elevator is going to a spesific floor"
-    priority 3 
-    "elevator is returning to rc"
-    priority 4
-
-
-    "avec sais chiffre je vais pouvoir calculer le total"
-    ELSE IF user_floor is higher to elevator floor AND user_destination is Up AND elevator destination is Up  Or  user_floor is lower to elevator floor AND user_destination is Down AND elevator destination is Down THEN
-    ADD TO bestCase_list to priority 1 
-
-    ELSE IF user_floor is EQUALS to elevator floor AND elevator is on idle THEN
-    ADD TO bestCase_list to priority 2
-
-    ELSE IF user_floor is higher to elevator floor AND elevator is on idle  OR  user_floor is lower to elevator_floor AND elevator is on idle THEN
-    ADD TO bestCase_list to priority 3
-
-    ELSE IF user_floor is higher to elevator floor AND user_destination is Up AND elevator destination is Down  OR  user_floor is lower to elevator floor AND user_destination is diffrent to elevator destination THEN
-    ADD TO bestCase_list to priority 4
-
-
-
-    "to calculate the diffrence between the floors without confusion"
-    FOR EACH negative number EQUALS positive number
-    Take all the values in EACH priority AND subtract them all together
-        RETURN elevator for the lowest value in EACH priority 
-    
-    ENDFOR
-ENDSEQUENCE
-
-
-"the default direction when user is not at the rc is down except if user is at basement"
-SEQUENCE queue USING floor AND direction
-IF request_elevator direction is EQUALS to elevator current direction AND the user is BETWEEN elevator AND floor THEN
-    elevator will stop AND Open_door AND Close_door AND continue is direction 
-ELSE user request_elevator direction is NOT EQUALS to current direction THEN
-    elevator will continue is Move 
-ENDSEQUENCE
-
-
-
-SEQUENCE operation_list USING floor AND destination
-INIT operation_list 
-IF elevator Move Up AND operation_list is NOT empty THEN 
-    new request is the last on the list 
-"every time the elevator is going to RC and there is a request on a floor lower elevator then the elevator will stop for a pick up"
-ELSE IF elvator Move Down THEN 
-every operation under the elevator_floor is going first on operation_list 
-
-
-
