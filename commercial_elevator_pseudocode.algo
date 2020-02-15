@@ -55,40 +55,40 @@ IF user press 2 times on the same buttons exept for the B1 to B6 buttons THEN
 RETURN TO 0 every 7 secondes
 "0 means ready to receive a other floor number" 
 
-SEQUENCE request_elevator USING floor AND direction
+SEQUENCE select column USING floor AND direction
     IF user press buttons on first floor THEN 
         RETURN number  
     IF floor IS BETWEEN 2 TO 20 THEN
-        print colonne A
+        print column A
 
-        INIT colonne A
+        INIT column A
         FOR every floor INPUT button to go down
             INIT elevator 
                 A1 TO A3
         END FOR
 
     ELSE IF floor IS BETWEEN 21 TO 40 THEN
-        print colonne B
+        print column B
 
-        INIT colonne B
+        INIT column B
         FOR every floor INPUT button to go down
             INIT elevator B
                 B1 TO B3
         END FOR
 
     ELSE IF floor IS BETWEEN 41 TO 60 THEN
-        print colonne C
+        print column C
 
-        INIT colonne C
+        INIT column C
         FOR every floor INPUT button to go down
             INIT elevator C
                 C1 TO C3
         END FOR
   
     ELSE IF floor IS BETWEEN B1 TO B6 THEN
-        print colonne D
+        print column D
 
-        INIT colonne D
+        INIT column D
         FOR every floor INPUT button to go down
             INIT elevator D
                 D1 TO D3
@@ -111,11 +111,11 @@ SEQUENCE find_elevator USING user_floor AND user_destination AND idle
 FOR EACH elevator_list
 
     IF floor is 2 to 20 THEN
-        RETURN column B 
+        RETURN column A 
     ELSE IF floor is 21 to 40
-        RETURN column C 
+        RETURN column B
     ELSE IF floor is 41 to 60
-        RETURN column D
+        RETURN column C
 SET priority_list
 
     IF elevator go up THEN 
